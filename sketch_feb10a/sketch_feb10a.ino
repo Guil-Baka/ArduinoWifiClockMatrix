@@ -42,7 +42,6 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  delay(1000);
   matrix.loadSequence(animation);
   matrix.begin();
   Serial.println("Startup...");
@@ -78,8 +77,8 @@ void loop()
 {
   // put your main code here, to run repeatedly:
   // Serial.println(WL_CONNECTED);
-  delay(1500);
-  checkConn();
+  delay(500);
+  checkConn();// Verifica se to conectado
   // printWifiData();
   // while (status != WL_CONNECTED)
   // {
@@ -96,13 +95,21 @@ void loop()
   //   delay(5000);
   // }
   textScroll(String(current_condition_text));
-  delay(1500);
+  delay(500);
   textScroll(String(temperature));
-  delay(1500);
+  delay(500);
   printRTCTime();
   // Serial.println(location_localtime);
   // setRTCTime();
-  checkInfoUpdated();
+  checkInfoUpdated();//de 15 em 15 minutos
+}
+
+void bootAnim(){
+  matrix.loadSequence(animation);
+  matrix.begin();
+  matrix.play(true);
+  matrix.play(false);
+  matrix.clear();
 }
 
 void checkInfoUpdated(){
@@ -136,8 +143,18 @@ void setRTCTime(){
 void printRTCTime(){
   RTC.getTime(currentTime);
   String time;
+  String hour;
   String mins;
+  int hours = currentTime.getHour();
   int minutes = currentTime.getMinutes();
+  if (hours < 10){
+    hour.reserve(4);
+    hour+="0";
+    hour+=String(hours);
+  }
+  else{
+    hour=String(hours);
+  }
   if (minutes < 10){
     mins.reserve(4);
     mins+="0";
@@ -148,9 +165,8 @@ void printRTCTime(){
   }
   time.reserve(16);
   time+= " ";
-  time+= String(currentTime.getHour());
+  time+= hour;
   time+= ":";
-  
   time+= mins;
   Serial.println(time);
   textScroll(time);
@@ -271,6 +287,7 @@ void checkConn()
     Serial.println("Not Connected");
     Serial.print(status);
     Serial.println("");
+    bootAnim();
     connectToNetworks(redes, 2);
   }
 }
